@@ -4,7 +4,7 @@
 const tracker = require('./tracker');
 const torrentParser = require('./torrent-parser');
 
-const torrent = torrentParser.open('sample.torrent');
+const torrent = torrentParser.open('tears-of-steel.torrent');
 
 tracker.getPeers(torrent, peers => {
     console.log('list of peers: ', peers);

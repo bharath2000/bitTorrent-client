@@ -15,16 +15,18 @@ module.exports.getPeers = (torrent,callback) => {
 
     socket.on('message', response=>{
         if(respType(response) === 'connect'){
-
+            console.log('trackers response received');
             const connResp = parseConnResp(response);
 
-            const announceReq = buildAnnounceReq(connResp.connectionId);
+            const announceReq = buildAnnounceReq(connResp.connectionId, torrent, url.port);
             udpSend(socket,announceReq,url);
         }
         else if(respType(response) === 'announce'){
+            console.log('announce response received');
             const announceResp  = parseAnnounceResp(response);
 
             callback(announceResp.peers);
+            socket.close();
         }
     });
     
@@ -32,9 +34,9 @@ module.exports.getPeers = (torrent,callback) => {
 };
 
 function udpSend(socket,message,rawUrl, callback=()=>{}){
+    console.log('message sending...');
     const url = urlParse(rawUrl);
-    console.log(url.host);
-    socket.send(message,0, message.length, url.port, url.host, callback);
+    socket.send(message,0, message.length, url.port, url.hostname, callback);
 }
 
 function respType(resp){
@@ -61,7 +63,6 @@ function buildConnReq(){
 }
 
 function parseConnResp(resp){
-    // console.log(resp.readUInt32BE(4));
     return {
         action : resp.readUInt32BE(0),
         transactionId : resp.readUInt32BE(4),
@@ -70,7 +71,6 @@ function parseConnResp(resp){
 }
 
 function buildAnnounceReq(connId, torrent, port=6881){
-    // console.log('announce called');
     const buf = Buffer.allocUnsafe(98);
     //connection-id
     connId.copy(buf, 0);
@@ -81,7 +81,7 @@ function buildAnnounceReq(connId, torrent, port=6881){
     //info-hash
     torrentParser.infoHash(torrent).copy(buf, 16);
     //peer-id
-    util.genId.copy(buf,36);
+    util.genId().copy(buf,36);
     //downloaded
     Buffer.alloc(8).copy(buf,56);
     //left

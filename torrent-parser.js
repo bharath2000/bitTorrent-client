@@ -3,7 +3,7 @@
 const fs = require('fs');
 const bencode = require('bencode');
 const crypto = require('crypto');
-// const bignum = require('bignum');
+const bignum = require('bignum');
 
 module.exports.open = (filepath) => {
     return bencode.decode(fs.readFileSync(filepath));
