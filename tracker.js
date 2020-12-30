@@ -7,13 +7,13 @@ const crypto = require('crypto');
 const torrentParser = require('./torrent-parser');
 const util = require('./util');
 
-module.exports.getPeers = (torrent,callback) => {
+module.exports.getPeers = (torrent, callback) => {
     const socket = dgram.createSocket('udp4');
     const url = torrent.announce.toString('utf8');
 
     udpSend(socket, buildConnReq(), url);
 
-    socket.on('message', response=>{
+    socket.on('message', response => {
         if(respType(response) === 'connect'){
             console.log('trackers response received');
             const connResp = parseConnResp(response);
@@ -26,16 +26,17 @@ module.exports.getPeers = (torrent,callback) => {
             const announceResp  = parseAnnounceResp(response);
 
             callback(announceResp.peers);
-            socket.close();
+            socket.close(); 
         }
     });
     
     
 };
 
-function udpSend(socket,message,rawUrl, callback=()=>{}){
+function udpSend(socket, message, rawUrl, callback=()=>{}){
     console.log('message sending...');
     const url = urlParse(rawUrl);
+    
     socket.send(message,0, message.length, url.port, url.hostname, callback);
 }
 
@@ -56,7 +57,8 @@ function buildConnReq(){
     buf.writeUInt32BE(0,8);
 
     //random transaction id
-    crypto.randomBytes(4).copy(buf,12);
+    const transId = crypto.randomBytes(4);
+    transId.copy(buf,12);
 
     return buf;
     

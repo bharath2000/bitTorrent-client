@@ -1,11 +1,8 @@
 'use strict';
-// const fs = require('fs');
-// const bencode = require('bencode');
-const tracker = require('./tracker');
+
+const download = require('./download');
 const torrentParser = require('./torrent-parser');
 
 const torrent = torrentParser.open('tears-of-steel.torrent');
 
-tracker.getPeers(torrent, peers => {
-    console.log('list of peers: ', peers);
-});
+download(torrent, torrent.info.name);
